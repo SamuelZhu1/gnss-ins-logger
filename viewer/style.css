@@ -1,0 +1,41 @@
+:root {
+  --bg: #f7f7f5;
+  --ink: #1d1d1f;
+  --muted: #6b6b70;
+  --line: #dcdcd8;
+  --gnss: #d1495b;
+  --fused: #2e86ab;
+  --reference: #1d1d1f;
+  --outage: #edae49;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+#panel { padding: 18px; border-right: 1px solid var(--line); overflow-y: auto; }
+#map { height: 100%; }
+h1 { font-size: 17px; margin: 0 0 6px; }
+.hint { color: var(--muted); margin: 0 0 14px; }
+code { font-size: 12px; background: #ececea; padding: 1px 4px; border-radius: 3px; }
+.file input { display: none; }
+.file span {
+  display: inline-block; padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; cursor: pointer;
+}
+.file span:hover { border-color: var(--muted); }
+#ride { margin: 16px 0 8px; font-weight: 600; }
+#tracks { list-style: none; padding: 0; margin: 0; }
+#tracks li { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.swatch { width: 18px; height: 4px; border-radius: 2px; }
+#stats { margin-top: 14px; color: var(--muted); font-size: 13px; }
+#stats div { padding: 2px 0; }
+body.drag #map { outline: 3px dashed var(--fused); outline-offset: -8px; }
+@media (max-width: 700px) {
+  body { grid-template-columns: 1fr; grid-template-rows: auto 60vh; }
+  #panel { border-right: 0; border-bottom: 1px solid var(--line); }
+}
