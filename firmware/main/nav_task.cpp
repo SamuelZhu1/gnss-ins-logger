@@ -137,7 +137,7 @@ void task(void* arg) {
         }
         gnss::PvtMsg m;
         while (xQueueReceive(ctx->pvt_queue, &m, 0) == pdTRUE) {
-            const int64_t epoch = g_time.on_pvt(m.arrival_us, m.pvt.itow_ms);
+            [[maybe_unused]] const int64_t epoch = g_time.on_pvt(m.arrival_us, m.pvt.itow_ms);
 #if CONFIG_GINS_STAMP_FIX_ON_ARRIVAL
             const int64_t t_fix = g_time.to_gps_us(m.arrival_us);  // the timing bug, for experiments
 #else

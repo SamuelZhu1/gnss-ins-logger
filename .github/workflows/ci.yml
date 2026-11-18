@@ -1,0 +1,83 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core-tests:
+    name: C++ core (GoogleTest, double and float)
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        precision: [double, float]
+    steps:
+      - uses: actions/checkout@v5
+      - run: sudo apt-get update && sudo apt-get install -y libeigen3-dev libgtest-dev
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DGINS_USE_FLOAT=${{ matrix.precision == 'float' && 'ON' || 'OFF' }}
+          cmake --build build -j
+      - name: GoogleTest
+        run: ctest --test-dir build --output-on-failure
+
+  python-tools:
+    name: Python tools (pytest, replay regression)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y libeigen3-dev
+      - name: Build and install the gins package (pybind11 module)
+        run: pip install "./tools[test]"
+      - name: pytest
+        run: python -m pytest tools/tests -v
+      - name: End to end on a synthetic ride
+        run: |
+          gins synth --out /tmp/s.bin --reference /tmp/s_ref.csv --minutes 10 --seed 3
+          gins convert /tmp/s.bin --dataset /tmp/ds --reference /tmp/s_ref.csv --ride-id synth_ci
+          gins bench --dataset /tmp/ds --lengths 10 20 --per-ride 10
+
+  static-analysis:
+    name: cppcheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: sudo apt-get update && sudo apt-get install -y cppcheck
+      - run: >
+          cppcheck --enable=warning,performance,portability --error-exitcode=1
+          --inline-suppr --std=c++17 --suppress=missingIncludeSystem
+          -I core/include core/src firmware/main
+
+  firmware:
+    name: ESP32-S3 firmware (ESP-IDF 5.2.2)
+    runs-on: ubuntu-24.04
+    container: espressif/idf:v5.2.2
+    strategy:
+      matrix:
+        variant: [release, experiments]
+    steps:
+      - uses: actions/checkout@v5
+      - run: apt-get update && apt-get install -y libeigen3-dev
+      - name: idf.py build (${{ matrix.variant }})
+        shell: bash
+        working-directory: firmware
+        run: |
+          . $IDF_PATH/export.sh
+          if [ "${{ matrix.variant }}" = experiments ]; then
+            printf 'CONFIG_GINS_STAMP_FIX_ON_ARRIVAL=y\nCONFIG_GINS_LOG_SYNC_WRITES=y\n' > sdkconfig.experiments
+            idf.py -B build_experiments -DSDKCONFIG=build_experiments/sdkconfig \
+              -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.experiments" build
+          else
+            idf.py build
+          fi
+      - uses: actions/upload-artifact@v7
+        with:
+          name: firmware-${{ matrix.variant }}
+          path: |
+            firmware/build*/gnss_ins_logger.bin
+            firmware/build*/bootloader/bootloader.bin
+            firmware/build*/partition_table/partition-table.bin

@@ -41,8 +41,8 @@ double normal_gravity(double lat_deg, double h_m) {
     return g0 - 3.086e-6 * h_m;
 }
 
-LocalFrame::LocalFrame(const Lla& origin) : valid_(true), origin_(origin) {
-    origin_ecef_ = lla_to_ecef(origin);
+LocalFrame::LocalFrame(const Lla& origin)
+    : valid_(true), origin_(origin), origin_ecef_(lla_to_ecef(origin)) {
     const double lat = origin.lat_deg * kDegToRad;
     const double lon = origin.lon_deg * kDegToRad;
     const double sl = std::sin(lat), cl = std::cos(lat);
