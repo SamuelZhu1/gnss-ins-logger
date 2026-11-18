@@ -1,0 +1,16 @@
+build/
+build_*/
+firmware/build/
+firmware/sdkconfig
+firmware/sdkconfig.old
+firmware/managed_components/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+tools/_skbuild/
+dataset/
+*.parquet
+.env
+.venv/
+.vscode/
+.DS_Store
