@@ -1,0 +1,81 @@
+menu "GNSS/INS logger"
+
+    menu "Pins"
+        config GINS_IMU_SCLK
+            int "IMU SPI SCLK"
+            default 12
+        config GINS_IMU_MOSI
+            int "IMU SPI MOSI"
+            default 11
+        config GINS_IMU_MISO
+            int "IMU SPI MISO"
+            default 13
+        config GINS_IMU_CS
+            int "IMU SPI CS"
+            default 10
+        config GINS_IMU_INT
+            int "IMU data-ready interrupt (INT1)"
+            default 14
+        config GINS_SD_SCLK
+            int "SD card SPI SCLK"
+            default 39
+        config GINS_SD_MOSI
+            int "SD card SPI MOSI"
+            default 40
+        config GINS_SD_MISO
+            int "SD card SPI MISO"
+            default 41
+        config GINS_SD_CS
+            int "SD card SPI CS"
+            default 42
+        config GINS_GNSS_TX
+            int "UART TX to the receiver's RX1"
+            default 17
+        config GINS_GNSS_RX
+            int "UART RX from the receiver's TX1"
+            default 18
+        config GINS_PPS
+            int "PPS input from the receiver's timepulse pin"
+            default 7
+    endmenu
+
+    config GINS_GNSS_BAUD
+        int "Receiver UART baud rate after configuration"
+        default 460800
+
+    config GINS_MOUNT_ROLL_DEG
+        int "IMU mounting roll in the bike frame (deg)"
+        default 0
+    config GINS_MOUNT_PITCH_DEG
+        int "IMU mounting pitch in the bike frame (deg)"
+        default 0
+    config GINS_MOUNT_YAW_DEG
+        int "IMU mounting yaw in the bike frame (deg)"
+        default 0
+
+    config GINS_ALIGN_S
+        int "Static alignment time (s)"
+        default 20
+
+    config GINS_RING_KB
+        int "Log ring buffer size (KB)"
+        default 64
+
+    config GINS_LOG_ON_BOOT
+        bool "Start logging at boot"
+        default y
+
+    config GINS_STAMP_FIX_ON_ARRIVAL
+        bool "Experiment: stamp GNSS fixes with their UART arrival time instead of PPS time"
+        default n
+        help
+            Reproduces the timing bug the PPS time base fixes. Leave off for normal use.
+
+    config GINS_LOG_SYNC_WRITES
+        bool "Experiment: write IMU records to SD from the filter task"
+        default n
+        help
+            Bypasses the ring buffer so SD stalls block sampling. Used to measure dropped
+            samples before and after the ring buffer. Leave off for normal use.
+
+endmenu
